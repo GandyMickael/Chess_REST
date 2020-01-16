@@ -60,7 +60,7 @@ public class Partie {
     public String getStatus(){
         return this.status;
     }
-    
+
     /**
      * Retrieves representation of an instance of Partie.GenericResource
      * @return an instance of java.lang.String
@@ -72,6 +72,7 @@ public class Partie {
         Board = new ArrayList<Piece>();
         this.couleur_tour="Blanc";
         this.status = "En jeu.";
+
         //CREATION DES PIECES
         //BLANC
         Pion pionb1 = new Pion("PB1", 12, "Blanc");
@@ -160,10 +161,10 @@ public class Partie {
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
+
     public ArrayList<Piece> getBoard() {
         return this.Board;
     }
-    
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Object[] move_piece(String pieceName, int newPosition) {
