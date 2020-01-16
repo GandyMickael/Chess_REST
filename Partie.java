@@ -24,7 +24,6 @@ import javax.ws.rs.*;
 @Path("echec")
 public class Partie {
     static ArrayList<Piece> Board;
-    String couleur_tour, status="";
     @Context
     private UriInfo context;
 
@@ -34,33 +33,6 @@ public class Partie {
     public  Partie() {
     }
     
-
-    public String create(){
-        if(this.status.equals("")){
-            this.status="En attente...";
-            String msg = this.status + "\nVoici votre couleur : Blanc.";
-            return msg;
-        }
-        else{
-            return "Une autre partie est en cours. "
-                    + "\nVeuillez la rejoindre ou attendre qu'elle se termine avant d'en lancer une nouvelle";
-        }
-    }
-    
-    public String join(){
-        if(this.status.equals("En attente...")){
-            this.status="Prêt";
-            return "Vous venez de rejoindre la partie, vote couleur sera : Noir";
-        }
-        else{
-            return this.create();
-        }
-    }
-    
-    public String getStatus(){
-        return this.status;
-    }
-
     /**
      * Retrieves representation of an instance of Partie.GenericResource
      * @return an instance of java.lang.String
@@ -70,10 +42,7 @@ public class Partie {
     public Object[] start() {
         //TODO return proper representation object
         Board = new ArrayList<Piece>();
-
-        this.couleur_tour="Blanc";
-        this.status = "En jeu.";
-
+        
         //CREATION DES PIECES
         //BLANC
         Pion pionb1 = new Pion("PB1", 12, "Blanc");
@@ -162,8 +131,23 @@ public class Partie {
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
-    public ArrayList<Piece> getBoard() {
-        return this.Board;
+    public Object[] getBoard(String couleur) {
+        Object[] table = new Object[2];
+        table[0] = this.Board;
+        if(couleur == "Blanc"){
+            table[1] = "Noir";
+        }
+        else{ 
+            table[1]="Blanc";
+        }
+
+        if(couleur == "null"){
+            table[2] = "Noir";
+        }
+        else{
+            table[2] = couleur;
+        }
+        return table;
     }
     
     @PUT
@@ -181,9 +165,6 @@ public class Partie {
                             if(!piece_mort.getCouleur().equals(piece.getCouleur())){ //On vérifie la couleur de la pièce
                                 piece_mort.setVie(false); //Si != on la sort du jeu
                                 Board.remove(piece_mort);  
-
-                                this.Board.remove(piece_mort);  
-
                                 piece.moveTo(newPosition);
                                 table[1] = this.Board;
                                 table[2] = "200 - Déplacement réussi";
@@ -223,9 +204,6 @@ public class Partie {
             case "Pion":
                 // code block
                 if(piece.getCouleur()=="Blanc"){
-
-                if(piece.getCouleur().equals("Blanc")){
-
                     //+1
                     
                     for(Piece piece_path : this.Board){

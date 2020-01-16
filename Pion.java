@@ -33,7 +33,7 @@ public class Pion extends Piece{
         if(this.couleur.equals("Blanc")){
             deplacement.add(this.position+1);
             Partie.Board.forEach((piece) -> {
-                if(piece.getCouleur().equals(this.getCouleur())){
+                if(piece.getCouleur()!=this.getCouleur()){
                     if(piece.position==this.position+11 || piece.position==this.position+9){
                         deplacement.add(piece.position);
                     }  
@@ -43,7 +43,7 @@ public class Pion extends Piece{
         else{
             deplacement.add(this.position-1);
             Partie.Board.forEach((piece) -> {
-                if(piece.getCouleur().equals(this.getCouleur())){
+                if(piece.getCouleur()!=this.getCouleur()){
                     if(piece.position==this.position-11 || piece.position==this.position-9){
                         deplacement.add(piece.position);
                     }  
