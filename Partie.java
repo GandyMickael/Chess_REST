@@ -223,8 +223,6 @@ public class Partie {
                 table[2] = "500 - Échec du déplacement. Réessayez.";
             }
         } 
-        
-
         return table;
     }
     
@@ -465,18 +463,9 @@ public class Partie {
     
     public String turn_change(String couleurJ){ //On changera de tour ici et on vérifira si la partie est terminée.
         int compteur_piece=0;
-        for(Piece piece : this.Board){
-            if(piece.getCouleur().equals(couleurJ)){
-                compteur_piece++;
-            }
-        }
-        if(compteur_piece==0){
-            this.end_game();
-            return "end";
-        }
-        else{
-            if(couleurJ.equals(this.couleur_tour)){
-            switch(this.couleur_tour) {
+
+        if(couleurJ.equals(this.couleur_tour)){//Débogage préventif
+            switch(this.couleur_tour) {//Le tour passe au joueur ayant la couleur suivante
                 case "Blanc":
                     this.couleur_tour="Noir";
                 break;
@@ -484,12 +473,24 @@ public class Partie {
                     this.couleur_tour="Blanc";
                 break;
             }
-            return this.couleur_tour;
+            //Vérification de fin de partie
+            for(Piece piece : this.Board){
+                if(piece.getCouleur().equals(couleurJ)){
+                    compteur_piece++;
+                }
+            }
+            if(compteur_piece==0){
+                this.end_game();
+                return "end";
             }
             else{
-                return "500 - Le joueur qui est en train de jouer n'est pas celui dont c'est le tour.";
-            }
-        }  
+                return this.couleur_tour;
+            } 
+        }
+        else{
+            return "500 - Le joueur qui est en train de jouer n'est pas celui dont c'est le tour.";
+        }
+        
     }
     
     @DELETE
