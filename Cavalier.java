@@ -5,6 +5,8 @@
  */
 package Echec;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Mickael
@@ -27,10 +29,10 @@ public final class Cavalier extends Piece{
     @Override
     public void moveTo(int newPosition){
         this.position=newPosition;
-        this.calculDeplacement();
     }
     
-    public void calculDeplacement(){
+    @Override
+    public ArrayList<Integer> calculDeplacement(){
         this.deplacement.clear();
         this.deplacement.add(this.position+7);
         this.deplacement.add(this.position-7);
@@ -40,5 +42,6 @@ public final class Cavalier extends Piece{
         this.deplacement.add(this.position-29);
         this.deplacement.add(this.position+31);
         this.deplacement.add(this.position-31);
+        return this.deplacement;
     }
 }

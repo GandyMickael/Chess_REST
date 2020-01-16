@@ -5,11 +5,13 @@
  */
 package Echec;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Mickael
  */
-public class Tour extends Piece{
+public final class Tour extends Piece{
     
     public Tour(String name, int position, String couleur){
         this.nom=name;
@@ -18,12 +20,7 @@ public class Tour extends Piece{
         this.type = "Tour";
         this.deplacement.clear();
         this.vie = true;
-        for(int i=1; i<=8; i++){
-            this.deplacement.add(this.position+i);
-            this.deplacement.add(this.position+i*10);
-            this.deplacement.add(this.position-i);
-            this.deplacement.add(this.position-i*10);
-        }
+        this.calculDeplacement();
     }
     
     /**
@@ -33,12 +30,17 @@ public class Tour extends Piece{
     @Override
     public void moveTo(int newPosition){
         this.position=newPosition;
-        deplacement.clear();
+    }
+    
+    @Override
+    public ArrayList<Integer> calculDeplacement(){
+        this.deplacement.clear();
         for(int i=1; i<=8; i++){
             this.deplacement.add(this.position+i);
             this.deplacement.add(this.position+i*10);
             this.deplacement.add(this.position-i);
             this.deplacement.add(this.position-i*10);
         }
-    }
+        return this.deplacement;
+    }  
 }

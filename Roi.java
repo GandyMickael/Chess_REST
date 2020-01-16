@@ -5,11 +5,13 @@
  */
 package Echec;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Mickael
  */
-public class Roi extends Piece{
+public final class Roi extends Piece{
     
     public Roi(String name, int position, String couleur){
         this.nom=name;
@@ -27,10 +29,10 @@ public class Roi extends Piece{
     @Override
     public void moveTo(int newPosition){
         this.position=newPosition;
-        this.calculDeplacement();
     }
     
-    public void calculDeplacement(){
+    @Override
+    public ArrayList<Integer> calculDeplacement(){
         this.deplacement.clear();
         this.deplacement.add(this.position+1);
         this.deplacement.add(this.position-1);
@@ -40,5 +42,6 @@ public class Roi extends Piece{
         this.deplacement.add(this.position-11);
         this.deplacement.add(this.position+9);
         this.deplacement.add(this.position-9);
+        return this.deplacement;
     } 
 }

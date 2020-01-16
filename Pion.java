@@ -5,6 +5,8 @@
  */
 package Echec;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Mickael
@@ -29,27 +31,31 @@ public class Pion extends Piece{
     @Override
     public void moveTo(int newPosition){
         this.position=newPosition;
-        deplacement.clear();
+    }
+    
+    @Override
+    public ArrayList<Integer> calculDeplacement(){
+        this.deplacement.clear();
         if(this.couleur.equals("Blanc")){
-            deplacement.add(this.position+1);
+            this.deplacement.add(this.position+1);
             Partie.Board.forEach((piece) -> {
                 if(piece.getCouleur().equals(this.getCouleur())){
                     if(piece.position==this.position+11 || piece.position==this.position+9){
-                        deplacement.add(piece.position);
+                        this.deplacement.add(piece.position);
                     }  
                 }
             });
         }
         else{
-            deplacement.add(this.position-1);
+            this.deplacement.add(this.position-1);
             Partie.Board.forEach((piece) -> {
                 if(piece.getCouleur().equals(this.getCouleur())){
                     if(piece.position==this.position-11 || piece.position==this.position-9){
-                        deplacement.add(piece.position);
+                        this.deplacement.add(piece.position);
                     }  
                 }
             });
         }
-        
-    }
+        return this.deplacement;
+    }  
 }

@@ -69,5 +69,5 @@ public class Piece {
         this.type = type;
     }
     
-    
+    public ArrayList<Integer> calculDeplacement(){ return deplacement;}
 }

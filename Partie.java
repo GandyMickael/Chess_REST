@@ -154,25 +154,26 @@ public class Partie {
         table[2] = "Blanc";
         return table;
     }
-
-    /**
-     * PUT method for updating or creating an instance of GenericResource
-     * @param content representation for the resource
-     */
-    @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-
-    public ArrayList<Piece> getBoard() {
-        return this.Board;
+    
+    public ArrayList<Integer> getDeplacement(String pieceName, String couleurJ){
+        ArrayList<Integer> deplacement_possible = new ArrayList<Integer>();
+        for(Piece piece : this.Board){
+            if(piece.getName().equals(pieceName) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ //On recherche notre pièce et on vérifie la couleur du joueur
+                deplacement_possible = piece.calculDeplacement(); //On calcul ses déplacements possibles
+            }   
+        }
+        return deplacement_possible; //On les retourne
     }
+    
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Object[] move_piece(String pieceName, int newPosition) {
+    public Object[] move_piece(String pieceName, int newPosition, String couleurJ) {
         boolean destination_vide = true;
         Object[] table = new Object[2];
         
         for(Piece piece : this.Board){
-            if(piece.getName().equals(pieceName) && piece.getDeplacement().contains(newPosition)){ //On cherche notre piece et on verifie si la position selectionnée est une position possible
+            //On cherche notre piece, on verifie si la position selectionnée est une position possible, si le joueur peut déplacer cette pièce (bonne couleur) et si c'est bien son tour (bonne couleur)
+            if(piece.getName().equals(pieceName) && piece.getDeplacement().contains(newPosition) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ 
                 if(check_deplacement(piece,newPosition)){  //On vérifie qu'il n'y a aucune pièce sur notre route
                     for(Piece piece_mort : this.Board){ 
                         if(piece_mort.getPosition()==newPosition ){ //On vérifie si aucune des autres pièce n'est sur notre destination
@@ -181,29 +182,45 @@ public class Partie {
                                 piece_mort.setVie(false); //Si != on la sort du jeu
                                 this.Board.remove(piece_mort);  
                                 piece.moveTo(newPosition);
-                                table[1] = this.Board;
-                                table[2] = "200 - Déplacement réussi";
+                                String tour = this.turn_change(couleurJ);
+                                if(tour.equals("end")){
+                                    table[1] = this.Board;
+                                    table[2] = "200 - Déplacement réussi. La partie est terminée.";
+                                }
+                                else{
+                                    table[1] = this.Board;
+                                    table[2] = "200 - Déplacement réussi. Tour au "+this.couleur_tour+".";
+                                }
+                                
+                                
                             }
                             else{ //Si == on ne peut pas se déplacer
                                 table[1] = this.Board;
-                                table[2] = "400 - Échec du déplacement";
+                                table[2] = "500 - Échec du déplacement. Réessayez.";
                             }
                         }
                     }
                     if(destination_vide==true){ //On vérifie si on a trouver une pièce sur la destination finale
                         piece.moveTo(newPosition); //Si non, on déplace la pièce
-                        table[1] = this.Board;
-                        table[2] = "200 - Déplacement réussi";
+                        String tour = this.turn_change(couleurJ);
+                        if(tour.equals("end")){
+                            table[1] = this.Board;
+                            table[2] = "200 - Déplacement réussi. La partie est terminée.";
+                        }
+                        else{
+                            table[1] = this.Board;
+                            table[2] = "200 - Déplacement réussi. Tour au "+this.couleur_tour+".";
+                        }
                     }     
                 }
                 else{ //S'il y a une pièce sur notre chemin, on ne bouge pas
                     table[1] = this.Board;
-                    table[2] = "400 - Échec du déplacement";
+                    table[2] = "500 - Échec du déplacement. Réessayez.";
                 }
             }
             else{ //Si le déplacement choisie n'est pas un déplacement possible, on ne bouge pas
                 table[1] = this.Board;
-                table[2] = "400 - Échec du déplacement";
+                table[2] = "500 - Échec du déplacement. Réessayez.";
             }
         } 
         
@@ -433,6 +450,52 @@ public class Partie {
         }
 
         return check;
+    }
+    
+    /**
+     * PUT method for updating or creating an instance of GenericResource
+     * @param content representation for the resource
+     */
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    public ArrayList<Piece> getBoard() {
+        //On peut rajouter à qui est le tour ici, si on ne peut pas envoyé un msg au deux joueurs sans requêtes.
+        return this.Board;
+    }
+    
+    public String turn_change(String couleurJ){ //On changera de tour ici et on vérifira si la partie est terminée.
+        int compteur_piece=0;
+        for(Piece piece : this.Board){
+            if(piece.getCouleur().equals(couleurJ)){
+                compteur_piece++;
+            }
+        }
+        if(compteur_piece==0){
+            this.end_game();
+            return "end";
+        }
+        else{
+            if(couleurJ.equals(this.couleur_tour)){
+            switch(this.couleur_tour) {
+                case "Blanc":
+                    this.couleur_tour="Noir";
+                break;
+                case "Noir":
+                    this.couleur_tour="Blanc";
+                break;
+            }
+            return this.couleur_tour;
+            }
+            else{
+                return "500 - Le joueur qui est en train de jouer n'est pas celui dont c'est le tour.";
+            }
+        }  
+    }
+    
+    @DELETE
+    public void end_game(){
+        this.status="";
+        this.Board.clear();
     }
 }
     
