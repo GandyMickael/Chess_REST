@@ -35,6 +35,9 @@ public class Partie {
     public  Partie() {
     }
     
+    @PUT
+    @Path("create")
+    @Produces(MediaType.TEXT_PLAIN)
     public String create(){
         if(this.status.equals("")){
             this.status="En attente...";
@@ -47,6 +50,9 @@ public class Partie {
         }
     }
     
+    @PUT
+    @Path("join")
+    @Produces(MediaType.TEXT_PLAIN)
     public String join(){
         if(this.status.equals("En attente...")){
             this.status="Prêt";
@@ -57,6 +63,9 @@ public class Partie {
         }
     }
     
+    @GET
+    @Path("status")
+    @Produces(MediaType.TEXT_PLAIN)
     public String getStatus(){
         return this.status;
     }
@@ -155,7 +164,10 @@ public class Partie {
         return table;
     }
     
-    public ArrayList<Integer> getDeplacement(String pieceName, String couleurJ){
+    @GET
+    @Path("pion/{type}/{col}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Integer> getDeplacement(@PathParam("type") String pieceName, @PathParam("col") String couleurJ){
         ArrayList<Integer> deplacement_possible = new ArrayList<Integer>();
         for(Piece piece : this.Board){
             if(piece.getName().equals(pieceName) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ //On recherche notre pièce et on vérifie la couleur du joueur
@@ -166,8 +178,9 @@ public class Partie {
     }
     
     @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Object[] move_piece(String pieceName, int newPosition, String couleurJ) {
+    @Path("/{piece}/{npos}/{colJ}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object[] move_piece(@PathParam("piece") String pieceName, @PathParam("npos") int newPosition, @PathParam("colJ") String couleurJ) {
         boolean destination_vide = true;
         Object[] table = new Object[2];
         
@@ -226,6 +239,7 @@ public class Partie {
         return table;
     }
     
+    //Pas d'annotation, inutilisable par les joueurs (IN MOVE PIECE)
     public boolean check_deplacement(Piece piece, int newpos){
         boolean verif_pion=false;
         boolean check = true; //Signifie qu'il n'y a rien sur le chemin 
@@ -450,17 +464,14 @@ public class Partie {
         return check;
     }
     
-    /**
-     * PUT method for updating or creating an instance of GenericResource
-     * @param content representation for the resource
-     */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Piece> getBoard() {
         //On peut rajouter à qui est le tour ici, si on ne peut pas envoyé un msg au deux joueurs sans requêtes.
         return this.Board;
     }
     
+    //Pas d'annotation, inutilisable par les joueurs (IN MOVE PIECE)
     public String turn_change(String couleurJ){ //On changera de tour ici et on vérifira si la partie est terminée.
         int compteur_piece=0;
 
