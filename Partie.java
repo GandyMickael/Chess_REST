@@ -23,8 +23,8 @@ import javax.ws.rs.*;
  */
 @Path("echec")
 public class Partie {
-    static ArrayList<Piece> Board;
-    String couleur_tour, status="";
+    static ArrayList<Piece> Board = new ArrayList<Piece>();
+    static String couleur_tour, status="";
     
     @Context
     private UriInfo context;
@@ -37,6 +37,7 @@ public class Partie {
     
     @PUT
     @Path("create")
+    //Distribue la première couleur au joueur qui l'active. Met la partie en attente.
     @Produces(MediaType.TEXT_PLAIN)
     public String create(){
         if(this.status.equals("")){
@@ -52,6 +53,7 @@ public class Partie {
     
     @PUT
     @Path("join")
+    //Si un joueur rejoins une partie déjà créee, le status devient prêt et il attribue la dernière couleur.
     @Produces(MediaType.TEXT_PLAIN)
     public String join(){
         if(this.status.equals("En attente...")){
@@ -66,8 +68,17 @@ public class Partie {
     @GET
     @Path("status")
     @Produces(MediaType.TEXT_PLAIN)
+    //Retourne le status de la partie
     public String getStatus(){
         return this.status;
+    }
+    
+    @GET
+    @Path("tour")
+    @Produces(MediaType.TEXT_PLAIN)
+    //Retourne le status de la partie
+    public String getTour(){
+        return this.couleur_tour;
     }
 
     /**
@@ -76,11 +87,12 @@ public class Partie {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Object[] start() {
+    //Crée la partie en ajoutant les pièces au plateau puis le retourne
+    public String start() {
         //TODO return proper representation object
-        Board = new ArrayList<Piece>();
+      //  Board = new ArrayList<Piece>();
         this.couleur_tour="Blanc";
-        this.status = "En jeu.";
+        
 
         //CREATION DES PIECES
         //BLANC
@@ -158,19 +170,31 @@ public class Partie {
         this.Board.add(cavaliern2);
         this.Board.add(tourn2);
         
-        Object[] table = new Object[2];
+        /*Object[] table = new Object[2];
         table[1] = this.Board;
-        table[2] = "Blanc";
-        return table;
+        table[2] = "Blanc";*/
+        if(this.Board.size()!=0){
+            this.status = "Partie en démarrée";
+        }
+        else{
+            this.status = "Erreur, veuillez relancer la partie";
+        }
+        return this.status;
     }
     
     @GET
     @Path("pion/{type}/{col}")
     @Produces(MediaType.APPLICATION_JSON)
+    //Permet de vérifier les déplacements possible pour une pièce 
     public ArrayList<Integer> getDeplacement(@PathParam("type") String pieceName, @PathParam("col") String couleurJ){
+        System.out.print("Dans getDeplacement");
         ArrayList<Integer> deplacement_possible = new ArrayList<Integer>();
-        for(Piece piece : this.Board){
+        int nb_p = Board.size();
+        System.out.println(nb_p);
+        for(Piece piece : Board){
+            System.out.print("Dans le foreach");
             if(piece.getName().equals(pieceName) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ //On recherche notre pièce et on vérifie la couleur du joueur
+                System.out.print("Dans le if");
                 deplacement_possible = piece.calculDeplacement(); //On calcul ses déplacements possibles
             }   
         }
@@ -180,13 +204,14 @@ public class Partie {
     @PUT
     @Path("/{piece}/{npos}/{colJ}")
     @Produces(MediaType.APPLICATION_JSON)
+    //Permet de déplacer une pièce après plusieurs vérifications
     public Object[] move_piece(@PathParam("piece") String pieceName, @PathParam("npos") int newPosition, @PathParam("colJ") String couleurJ) {
         boolean destination_vide = true;
         Object[] table = new Object[2];
         
         for(Piece piece : this.Board){
             //On cherche notre piece, on verifie si la position selectionnée est une position possible, si le joueur peut déplacer cette pièce (bonne couleur) et si c'est bien son tour (bonne couleur)
-            if(piece.getName().equals(pieceName) && piece.getDeplacement().contains(newPosition) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ 
+            if(piece.getName().equals(pieceName) && piece.calculDeplacement().contains(newPosition) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ 
                 if(check_deplacement(piece,newPosition)){  //On vérifie qu'il n'y a aucune pièce sur notre route
                     for(Piece piece_mort : this.Board){ 
                         if(piece_mort.getPosition()==newPosition ){ //On vérifie si aucune des autres pièce n'est sur notre destination
@@ -240,6 +265,7 @@ public class Partie {
     }
     
     //Pas d'annotation, inutilisable par les joueurs (IN MOVE PIECE)
+    //Vérifie si une pièce est sur le chemin 
     public boolean check_deplacement(Piece piece, int newpos){
         boolean verif_pion=false;
         boolean check = true; //Signifie qu'il n'y a rien sur le chemin 
@@ -270,11 +296,11 @@ public class Partie {
                 verif_pion=false;
                 for(Piece piece_path : this.Board){
                     for(int i=0;i<=7;i++){
-                        if(piece_path.getPosition()==position+i*10 && position+i*10!=newpos){
-                            verif_pion=true;
+                        if(piece_path.getPosition()==position+i*10 && position+i*10!=newpos){//Si la pièce est sur le chemin
+                            verif_pion=true;//On notifie qu'elle existe
                         }
-                        if(position+i*10==newpos && verif_pion==true){
-                            check=false;
+                        if(position+i*10==newpos && verif_pion==true){//Si notre destination est bien sur ce chemin et qu'une pièce a été notifiée
+                            check=false;//On ne peut aller à notre destination
                         }
                     }
                 }
@@ -423,7 +449,7 @@ public class Partie {
                 verif_pion=false;
                 for(Piece piece_path : this.Board){
                     for(int i=0;i<=7;i++){
-                        if(piece_path.getPosition()==position+i*9 && position+i*9!=newpos){ //Si la pièce est sur le chemin
+                        if(piece_path.getPosition()==position+i*9 && position+i*9!=newpos){ 
                             verif_pion=true; //On notifie qu'elle existe
                         }
                         if(position+i*9==newpos && verif_pion==true){ //Si notre destination est bien sur ce chemin et qu'une pièce a été notifiée
@@ -466,13 +492,16 @@ public class Partie {
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    //Retourne le plateau
     public ArrayList<Piece> getBoard() {
         //On peut rajouter à qui est le tour ici, si on ne peut pas envoyé un msg au deux joueurs sans requêtes.
         return this.Board;
     }
     
     //Pas d'annotation, inutilisable par les joueurs (IN MOVE PIECE)
-    public String turn_change(String couleurJ){ //On changera de tour ici et on vérifira si la partie est terminée.
+    //Permet, à la fin d'un tour (après un déplacement), de modifier le joueur dont c'est le tour
+    // Et de vérifier si la partie est terminée.
+    public String turn_change(String couleurJ){
         int compteur_piece=0;
 
         if(couleurJ.equals(this.couleur_tour)){//Débogage préventif
@@ -505,6 +534,7 @@ public class Partie {
     }
     
     @DELETE
+    //Permet de mettre fin à la partie
     public void end_game(){
         this.status="";
         this.Board.clear();

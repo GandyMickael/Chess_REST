@@ -12,10 +12,11 @@ import java.util.ArrayList;
  * @author Mickael
  */
 public class Pion extends Piece{
-    
+    int depart;
     public Pion(String name, int position, String couleur){
         this.nom=name;
         this.position = position;
+        this.depart = position;
         this.couleur = couleur;
         this.type = "Pion";
         this.vie = true;
@@ -38,6 +39,9 @@ public class Pion extends Piece{
         this.deplacement.clear();
         if(this.couleur.equals("Blanc")){
             this.deplacement.add(this.position+1);
+            if(this.position==this.depart){
+                this.deplacement.add(this.position+2);
+            }
             Partie.Board.forEach((piece) -> {
                 if(piece.getCouleur().equals(this.getCouleur())){
                     if(piece.position==this.position+11 || piece.position==this.position+9){
@@ -48,6 +52,9 @@ public class Pion extends Piece{
         }
         else{
             this.deplacement.add(this.position-1);
+            if(this.position==this.depart){
+                this.deplacement.add(this.position+2);
+            }
             Partie.Board.forEach((piece) -> {
                 if(piece.getCouleur().equals(this.getCouleur())){
                     if(piece.position==this.position-11 || piece.position==this.position-9){

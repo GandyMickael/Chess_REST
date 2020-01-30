@@ -16,7 +16,7 @@ public class Piece {
     protected String couleur;
     protected int position;
     protected String type;
-    protected ArrayList<Integer> deplacement;
+    protected ArrayList<Integer> deplacement = new ArrayList<Integer>();
     protected boolean vie;
     public Piece(){
     }
@@ -25,12 +25,25 @@ public class Piece {
         return this.nom;
     }
     
+    
+    public void setPosition(int newPosition){
+        this.position=newPosition;
+    }
+    
     public int getPosition(){
         return this.position;
     }
     
+    public void setCouleur(String col){
+        this.couleur=col;
+    }
+    
     public String getCouleur(){
         return this.couleur;
+    }
+    
+    public void setDeplacement(ArrayList<Integer> newDep){
+        this.deplacement=newDep;
     }
     
     public ArrayList<Integer> getDeplacement(){
