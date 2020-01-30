@@ -21,8 +21,7 @@ public class Pion extends Piece{
         this.type = "Pion";
         this.vie = true;
         this.deplacement.clear();
-        this.deplacement.add(this.position+1);
-        this.deplacement.add(this.position+2);
+        this.calculDeplacement();
     }
     
     /**
@@ -42,26 +41,26 @@ public class Pion extends Piece{
             if(this.position==this.depart){
                 this.deplacement.add(this.position+2);
             }
-            Partie.Board.forEach((piece) -> {
-                if(piece.getCouleur().equals(this.getCouleur())){
-                    if(piece.position==this.position+11 || piece.position==this.position+9){
+            for(Piece piece : Partie.Board){ 
+                if(!piece.getCouleur().equals(this.getCouleur())){
+                    if(piece.position==this.position+11 || piece.position==this.position-9){
                         this.deplacement.add(piece.position);
                     }  
                 }
-            });
+            }
         }
         else{
             this.deplacement.add(this.position-1);
             if(this.position==this.depart){
-                this.deplacement.add(this.position+2);
+                this.deplacement.add(this.position-2);
             }
-            Partie.Board.forEach((piece) -> {
-                if(piece.getCouleur().equals(this.getCouleur())){
-                    if(piece.position==this.position-11 || piece.position==this.position-9){
+            for(Piece piece : Partie.Board){ 
+                if(!piece.getCouleur().equals(this.getCouleur())){
+                    if(piece.position==this.position-11 || piece.position==this.position+9){
                         this.deplacement.add(piece.position);
                     }  
                 }
-            });
+            }
         }
         return this.deplacement;
     }  

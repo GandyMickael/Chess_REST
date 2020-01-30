@@ -6,6 +6,7 @@
 package Echec;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -172,9 +173,9 @@ public class Partie {
         
         /*Object[] table = new Object[2];
         table[1] = this.Board;
-        table[2] = "Blanc";*/
+        return "Blanc";*/
         if(this.Board.size()!=0){
-            this.status = "Partie en démarrée";
+            this.status = "Partie démarrée";
         }
         else{
             this.status = "Erreur, veuillez relancer la partie";
@@ -183,19 +184,18 @@ public class Partie {
     }
     
     @GET
-    @Path("pion/{type}/{col}")
+    @Path("pion/{nomP}/{col}")
     @Produces(MediaType.APPLICATION_JSON)
     //Permet de vérifier les déplacements possible pour une pièce 
-    public ArrayList<Integer> getDeplacement(@PathParam("type") String pieceName, @PathParam("col") String couleurJ){
-        System.out.print("Dans getDeplacement");
-        ArrayList<Integer> deplacement_possible = new ArrayList<Integer>();
+    public ArrayList<MyEntier> getDeplacement(@PathParam("nomP") String pieceName, @PathParam("col") String couleurJ){
+        ArrayList<MyEntier> deplacement_possible = new ArrayList<MyEntier>();
         int nb_p = Board.size();
-        System.out.println(nb_p);
         for(Piece piece : Board){
-            System.out.print("Dans le foreach");
             if(piece.getName().equals(pieceName) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ //On recherche notre pièce et on vérifie la couleur du joueur
-                System.out.print("Dans le if");
-                deplacement_possible = piece.calculDeplacement(); //On calcul ses déplacements possibles
+                ArrayList<Integer> deplacement = piece.calculDeplacement();
+                for(int i=0;i<=deplacement.size()-1;i++){
+                    deplacement_possible.add(new MyEntier(deplacement.get(i))); //On utilise des objets à cause d'un bug empêchant l'utilisation de Mediatype JSON sur les Integer
+                }
             }   
         }
         return deplacement_possible; //On les retourne
@@ -204,11 +204,10 @@ public class Partie {
     @PUT
     @Path("/{piece}/{npos}/{colJ}")
     @Produces(MediaType.APPLICATION_JSON)
-    //Permet de déplacer une pièce après plusieurs vérifications
-    public Object[] move_piece(@PathParam("piece") String pieceName, @PathParam("npos") int newPosition, @PathParam("colJ") String couleurJ) {
+    //Permet de déplacer une pièce après plusieurs vérifications et renvoie la réponse
+    public String move_piece(@PathParam("piece") String pieceName, @PathParam("npos") int newPosition, @PathParam("colJ") String couleurJ) {
         boolean destination_vide = true;
-        Object[] table = new Object[2];
-        
+        String msg ="500 - Erreur Possible. Veuillez Réessayer.";
         for(Piece piece : this.Board){
             //On cherche notre piece, on verifie si la position selectionnée est une position possible, si le joueur peut déplacer cette pièce (bonne couleur) et si c'est bien son tour (bonne couleur)
             if(piece.getName().equals(pieceName) && piece.calculDeplacement().contains(newPosition) && couleurJ.equals(this.couleur_tour) && piece.getCouleur().equals(couleurJ)){ 
@@ -222,19 +221,14 @@ public class Partie {
                                 piece.moveTo(newPosition);
                                 String tour = this.turn_change(couleurJ);
                                 if(tour.equals("end")){
-                                    table[1] = this.Board;
-                                    table[2] = "200 - Déplacement réussi. La partie est terminée.";
+                                    return "200 - Déplacement réussi. La partie est terminée.";
                                 }
                                 else{
-                                    table[1] = this.Board;
-                                    table[2] = "200 - Déplacement réussi. Tour au "+this.couleur_tour+".";
-                                }
-                                
-                                
+                                    return "200 - Déplacement réussi. Tour au "+this.couleur_tour+".";
+                                }  
                             }
                             else{ //Si == on ne peut pas se déplacer
-                                table[1] = this.Board;
-                                table[2] = "500 - Échec du déplacement. Réessayez.";
+                                return "500.1 - Échec du déplacement. Réessayez.";
                             }
                         }
                     }
@@ -242,26 +236,22 @@ public class Partie {
                         piece.moveTo(newPosition); //Si non, on déplace la pièce
                         String tour = this.turn_change(couleurJ);
                         if(tour.equals("end")){
-                            table[1] = this.Board;
-                            table[2] = "200 - Déplacement réussi. La partie est terminée.";
+                            return "200 - Déplacement réussi. La partie est terminée.";
                         }
                         else{
-                            table[1] = this.Board;
-                            table[2] = "200 - Déplacement réussi. Tour au "+this.couleur_tour+".";
+                            return "200 - Déplacement réussi. Tour au "+this.couleur_tour+".";                         
                         }
                     }     
                 }
                 else{ //S'il y a une pièce sur notre chemin, on ne bouge pas
-                    table[1] = this.Board;
-                    table[2] = "500 - Échec du déplacement. Réessayez.";
+                    return "500.2 - Échec du déplacement. Réessayez.";
                 }
             }
             else{ //Si le déplacement choisie n'est pas un déplacement possible, on ne bouge pas
-                table[1] = this.Board;
-                table[2] = "500 - Échec du déplacement. Réessayez.";
+                msg = "500.3 - Échec du déplacement. Réessayez.";
             }
         } 
-        return table;
+        return msg;
     }
     
     //Pas d'annotation, inutilisable par les joueurs (IN MOVE PIECE)
